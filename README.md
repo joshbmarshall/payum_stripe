@@ -23,7 +23,7 @@ $payum = (new PayumBuilder)
         return new \Cognito\PayumStripeCheckout\StripeCheckoutGatewayFactory($config, $coreGatewayFactory);
     })
 
-    ->addGateway('stripe_checkout', [
+    ->addGateway('cp_stripe_checkout', [
         'factory' => 'cp_stripe_checkout',
         'publishable_key' => 'Your Public Key',
         'secret_key' => 'Your Private Key',
@@ -57,7 +57,7 @@ $payment->setDetails([
 ]);
 $storage->setInternalDetails($payment, $request);
 
-$captureToken = $payum->getTokenFactory()->createCaptureToken('stripe_checkout', $payment, 'done.php');
+$captureToken = $payum->getTokenFactory()->createCaptureToken('cp_stripe_checkout', $payment, 'done.php');
 $url = $captureToken->getTargetUrl();
 header("Location: " . $url);
 die();
