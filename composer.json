@@ -1,7 +1,7 @@
 {
-    "name": "cognito/payum_stripe_checkout",
+    "name": "cognito/payum_stripe_elements",
     "type": "project",
-    "description": "The Payum Stripe Checkout payment module",
+    "description": "The Payum Stripe Elements payment module",
     "keywords": ["payment"],
     "homepage": "https://payum.forma-pro.com",
     "license": "MIT",
@@ -35,7 +35,7 @@
         "bin-dir": "bin"
     },
     "autoload": {
-        "psr-4": { "Cognito\\PayumStripeCheckout\\": "src/" }
+        "psr-4": { "Cognito\\PayumStripeElements\\": "src/" }
     },
     "extra": {
         "branch-alias": {

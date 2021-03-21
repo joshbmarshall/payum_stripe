@@ -1,12 +1,12 @@
-# Stripe Checkout Payment Module
+# Stripe Elements Payment Module
 
-The Payum extension to purchase through Stripe using Checkout
+The Payum extension to purchase through Stripe using Elements
 
 ## Install and Use
 
 To install, it's easiest to use composer:
 
-    composer require cognito/payum_stripe_checkout
+    composer require cognito/payum_stripe_elements
 
 ### Build the config
 
@@ -19,12 +19,12 @@ use Payum\Core\GatewayFactoryInterface;
 $defaultConfig = [];
 
 $payum = (new PayumBuilder)
-    ->addGatewayFactory('cp_stripe_checkout', function(array $config, GatewayFactoryInterface $coreGatewayFactory) {
-        return new \Cognito\PayumStripeCheckout\StripeCheckoutGatewayFactory($config, $coreGatewayFactory);
+    ->addGatewayFactory('stripe_elements', function(array $config, GatewayFactoryInterface $coreGatewayFactory) {
+        return new \Cognito\PayumStripeElements\StripeElementsGatewayFactory($config, $coreGatewayFactory);
     })
 
-    ->addGateway('cp_stripe_checkout', [
-        'factory' => 'cp_stripe_checkout',
+    ->addGateway('stripe_elements', [
+        'factory' => 'stripe_elements',
         'publishable_key' => 'Your Public Key',
         'secret_key' => 'Your Private Key',
     ])
@@ -57,7 +57,7 @@ $payment->setDetails([
 ]);
 $storage->setInternalDetails($payment, $request);
 
-$captureToken = $payum->getTokenFactory()->createCaptureToken('cp_stripe_checkout', $payment, 'done.php');
+$captureToken = $payum->getTokenFactory()->createCaptureToken('stripe_elements', $payment, 'done.php');
 $url = $captureToken->getTargetUrl();
 header("Location: " . $url);
 die();
@@ -90,4 +90,4 @@ if ($status->isNew() || $status->isCaptured() || $status->isAuthorized()) {
 
 ## License
 
-Payum Stripe Checkout is released under the [MIT License](LICENSE).
+Payum Stripe Elements is released under the [MIT License](LICENSE).
