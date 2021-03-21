@@ -46,40 +46,19 @@ class ObtainNonceAction implements ActionInterface, GatewayAwareInterface {
         $this->gateway->execute($getHttpRequest);
         if ($getHttpRequest->method == 'POST' && isset($getHttpRequest->request['payment_intent'])) {
             $model['nonce'] = $getHttpRequest->request['payment_intent'];
-
             return;
         }
 
-        if (false) {
-            $email = $model['local']['email'];
-
-            // Search for customer
-            $customer_id = md5($email);
-            try {
-                $customer = $model['stripeElementsGateway']->customer()->find($customer_id);
-            } catch (\Exception $e) {
-                $result = $model['stripeElementsGateway']->customer()->create([
-                    'id' => $customer_id,
-                    'email' => $email,
-                ]);
-            }
-            //dump($StripeElementsGateway->clientToken()->generate());exit;
-            $clientToken = $model['stripeElementsGateway']->clientToken()->generate([
-                'customerId' => $customer_id,
-            ]);
-        }
-
         $model['stripePaymentIntent'] = \Stripe\PaymentIntent::create([
-            'amount' => round($model['amount'] * 100),
+            'amount' => round($model['amount'] * pow(10, $model['currencyDigits'])),
             'currency' => $model['currency'],
-            // Verify your integration in this guide by including this parameter
             'metadata' => ['integration_check' => 'accept_a_payment'],
+            'statement_descriptor' => $model['statement_descriptor_suffix'],
+            'description' => $model['description'],
         ]);
 
         $this->gateway->execute($renderTemplate = new RenderTemplate($this->templateName, array(
-            //'model' => $model,
             'amount' => $model['currencySymbol'] . ' ' . number_format($model['amount'], $model['currencyDigits']),
-            //'clientToken' => $clientToken,
             'client_secret' => $model['stripePaymentIntent']->client_secret,
             'publishable_key' => $model['publishable_key'],
             'actionUrl' => $getHttpRequest->uri,
