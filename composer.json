@@ -1,6 +1,6 @@
 {
     "name": "cognito/payum_stripe_elements",
-    "type": "project",
+    "type": "library",
     "description": "The Payum Stripe Elements payment module",
     "keywords": ["payment"],
     "homepage": "https://payum.forma-pro.com",
