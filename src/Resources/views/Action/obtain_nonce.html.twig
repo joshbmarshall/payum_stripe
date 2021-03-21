@@ -96,7 +96,6 @@ var payWithCard = function(stripe, card, clientSecret) {
         showError(result.error.message);
       } else {
         // The payment succeeded!
-        console.log(result)
         orderComplete(result.paymentIntent.id);
       }
     });

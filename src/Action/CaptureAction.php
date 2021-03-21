@@ -44,28 +44,6 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface {
         $this->gateway->execute($obtainNonce);
 
         if (!$model->offsetExists('status')) {
-            if (false) {
-                // Create transaction
-                $transactionResult = $model['stripeElementsGateway']->transaction()->sale([
-                    'amount' => $model['amount'],
-                    'paymentMethodNonce' => $model['nonce'],
-                    //'deviceData' => $deviceDataFromTheClient,
-                    'options' => [
-                        'submitForSettlement' => true
-                    ]
-                ]);
-                if ($transactionResult->success) {
-                    // Report successful
-                    $model['status'] = 'success';
-                } else {
-                    // Report error
-                    $model['status'] = 'failed';
-                    $model['error'] = 'failed';
-                }
-                $model['transactionReference'] = $transactionResult->transaction->id;
-                $model['result'] = $transactionResult->transaction;
-            }
-            //$paymentIntent = $model['stripeElementsGateway']->paymentIntents->retrieve($model['nonce']);
             $stripe = new \Stripe\StripeClient($this->config['secret_key']);
             $paymentIntent = $stripe->paymentIntents->retrieve($model['nonce'], []);
             if ($paymentIntent->status == \Stripe\PaymentIntent::STATUS_SUCCEEDED) {
@@ -79,9 +57,7 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface {
                 $model['transactionReference'] = $charge->id;
                 $model['result'] = $charge;
             }
-            dump(__LINE__, $model);
         }
-        dump($this, get_defined_vars());
     }
 
     /**
