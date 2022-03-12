@@ -37,6 +37,7 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface {
 
         \Stripe\Stripe::setApiKey($this->config['secret_key']);
         $model['publishable_key'] = $this->config['publishable_key'];
+        $model['img_url'] = $this->config['img_url'] ?? '';
 
         $obtainNonce = new ObtainNonce($request->getModel());
         $obtainNonce->setModel($model);

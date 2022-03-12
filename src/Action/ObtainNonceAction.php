@@ -55,6 +55,9 @@ class ObtainNonceAction implements ActionInterface, GatewayAwareInterface {
             'metadata' => ['integration_check' => 'accept_a_payment'],
             'statement_descriptor' => $model['statement_descriptor_suffix'],
             'description' => $model['description'],
+            'automatic_payment_methods' => [
+                'enabled' => 'true',
+            ],
         ]);
 
         $this->gateway->execute($renderTemplate = new RenderTemplate($this->templateName, array(
@@ -62,6 +65,7 @@ class ObtainNonceAction implements ActionInterface, GatewayAwareInterface {
             'client_secret' => $model['stripePaymentIntent']->client_secret,
             'publishable_key' => $model['publishable_key'],
             'actionUrl' => $getHttpRequest->uri,
+            'imgUrl' => $model['img_url'],
         )));
 
         throw new HttpResponse($renderTemplate->getResult());
