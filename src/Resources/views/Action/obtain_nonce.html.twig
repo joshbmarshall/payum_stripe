@@ -84,6 +84,33 @@
 // prompt the user to enter authentication details without leaving your page.
 var payWithCard = function(stripe) {
   loading(true);
+  // Afterpay?
+  if ({{ use_afterpay }}) {
+    stripe.confirmAfterpayClearpayPayment(
+      '{{ client_secret }}',
+      {
+        payment_method: {
+          billing_details: {
+            email: "{{ billing.email }}",
+            name: "{{ billing.name }}", // Double quotes less likely to be in a name
+            address: {
+              line1: "{{ billing.address.line1 }}",
+              city: "{{ billing.address.city }}",
+              state: "{{ billing.address.state }}",
+              country: "{{ billing.address.country }}",
+              postal_code: "{{ billing.address.postal_code }}",
+            },
+          },
+        },
+        return_url: window.location.href,
+      }
+    ).then(function(result) {
+      if (result.error) {
+        // Inform the customer that there was an error.
+      }
+    });
+    return
+  }
   stripe
     .confirmPayment({
       elements,

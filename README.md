@@ -27,13 +27,21 @@ $payum = (new PayumBuilder)
         'factory' => 'stripe_elements',
         'publishable_key' => 'Your Public Key',
         'secret_key' => 'Your Private Key',
+        'img_url' => 'https://path/to/logo/image.jpg',
+    ])
+
+    ->addGateway('stripe_afterpay', [
+        'factory' => 'stripe_afterpay',
+        'publishable_key' => 'Your Public Key',
+        'secret_key' => 'Your Private Key',
+        'img_url' => 'https://path/to/logo/image.jpg',
     ])
 
     ->getPayum()
 ;
 ```
 
-### Request payment
+### Request card payment
 
 ```php
 <?php
@@ -51,13 +59,66 @@ $payment->setCurrencyCode($currency);
 $payment->setTotalAmount(100); // Total cents
 $payment->setDescription(substr($description, 0, 45));
 $payment->setDetails([
-        'local' => [
+    'local' => [
         'email' => $email, // Used for the customer to be able to save payment details
     ],
 ]);
 $storage->setInternalDetails($payment, $request);
 
 $captureToken = $payum->getTokenFactory()->createCaptureToken('stripe_elements', $payment, 'done.php');
+$url = $captureToken->getTargetUrl();
+header("Location: " . $url);
+die();
+```
+
+### Request Afterpay payment
+
+Afterpay requires more information about the customer to process the payment
+
+```php
+<?php
+
+use Payum\Core\Request\Capture;
+
+$storage = $payum->getStorage(\Payum\Core\Model\Payment::class);
+$request = [
+    'invoice_id' => 100,
+];
+
+$payment = $storage->create();
+$payment->setNumber(uniqid());
+$payment->setCurrencyCode($currency);
+$payment->setTotalAmount(100); // Total cents
+$payment->setDescription(substr($description, 0, 45));
+$payment->setDetails([
+    'local' => [
+        'email' => $email, // Used for the customer to be able to save payment details
+    ],
+    'shipping' => [
+        'name' => 'Firstname Lastname',
+        'address' => [
+            'line1' => 'Address Line 1',
+            'city' => 'Address City',
+            'state' => 'Address State',
+            'country' => 'Address Country',
+            'postal_code' => 'Address Postal Code',
+        ],
+    ],
+    'billing' => [
+        'name' => trim($shopper['first_name'] . ' ' . $shopper['last_name']),
+        'email' => $shopper['email'],
+        'address' => [
+            'line1' => 'Address Line 1',
+            'city' => 'Address City',
+            'state' => 'Address State',
+            'country' => 'Address Country',
+            'postal_code' => 'Address Postal Code',
+        ],
+    ],
+]);
+$storage->setInternalDetails($payment, $request);
+
+$captureToken = $payum->getTokenFactory()->createCaptureToken('stripe_afterpay', $payment, 'done.php');
 $url = $captureToken->getTargetUrl();
 header("Location: " . $url);
 die();
@@ -80,11 +141,11 @@ $gateway->execute($status = new GetHumanStatus($model));
 
 // using shortcut
 if ($status->isNew() || $status->isCaptured() || $status->isAuthorized()) {
-	// success
+    // success
 } elseif ($status->isPending()) {
-	// most likely success, but you have to wait for a push notification.
+    // most likely success, but you have to wait for a push notification.
 } elseif ($status->isFailed() || $status->isCanceled()) {
-	// the payment has failed or user canceled it.
+    // the payment has failed or user canceled it.
 }
 ```
 
