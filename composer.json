@@ -20,7 +20,7 @@
         },
         {
             "name":     "Community contributions",
-            "homepage": "https://github.com/Payum/AuthorizeNetAim/contributors"
+            "homepage": "https://github.com/joshbmarshall/payum_stripe/contributors"
         }
     ],
     "require": {
