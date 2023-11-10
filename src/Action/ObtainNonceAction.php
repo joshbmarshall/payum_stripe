@@ -21,14 +21,12 @@ class ObtainNonceAction implements ActionInterface, GatewayAwareInterface {
      * @var string
      */
     protected $templateName;
-    protected $use_afterpay;
 
     /**
      * @param string $templateName
      */
-    public function __construct(string $templateName, bool $use_afterpay) {
+    public function __construct(string $templateName) {
         $this->templateName = $templateName;
-        $this->use_afterpay = $use_afterpay;
     }
 
     /**
@@ -52,36 +50,31 @@ class ObtainNonceAction implements ActionInterface, GatewayAwareInterface {
             $model['nonce'] = $getHttpRequest->request['payment_intent'];
             return;
         }
-        $afterPayDetails = [];
-        if ($this->use_afterpay) { // Afterpay order
-            $afterPayDetails = [
-                'confirm' => true,
-                'payment_method_types' => ['afterpay_clearpay'],
-                'shipping' => $model['shipping'],
-                'payment_method_data' => [
-                    'type' => 'afterpay_clearpay',
-                    'billing_details' => $model['billing'],
-                ],
-                'return_url' => $uri->withPath('')->withFragment('')->withQuery('')->__toString() . $getHttpRequest->uri,
-            ];
-        }
-        $paymentIntentData = array_merge([
+        $limit_payment_type = $model['limit_payment_type'] ?? '';
+        $paymentIntentData = [
             'amount' => round($model['amount'] * pow(10, $model['currencyDigits'])),
-            'payment_method_types' => $model['payment_method_types'] ?? ['card'],
+            'shipping' => $model['shipping'],
             'currency' => $model['currency'],
             'metadata' => ['integration_check' => 'accept_a_payment'],
             'statement_descriptor' => $model['statement_descriptor_suffix'],
             'description' => $model['description'],
-        ], $afterPayDetails);
+        ];
+        if ($limit_payment_type) {
+            $paymentIntentData['payment_method_types'] = explode(',', $limit_payment_type);
+        } else {
+            $paymentIntentData['automatic_payment_methods'] = [
+                'enabled' => true,
+                'allow_redirects' => 'always',
+            ];
+        }
 
         $model['stripePaymentIntent'] = \Stripe\PaymentIntent::create($paymentIntentData);
         $this->gateway->execute($renderTemplate = new RenderTemplate($this->templateName, array(
             'amount' => $model['currencySymbol'] . ' ' . number_format($model['amount'], $model['currencyDigits']),
             'client_secret' => $model['stripePaymentIntent']->client_secret,
             'publishable_key' => $model['publishable_key'],
-            'actionUrl' => $getHttpRequest->uri,
+            'actionUrl' => $uri->withPath('')->withFragment('')->withQuery('')->__toString() . $getHttpRequest->uri,
             'imgUrl' => $model['img_url'],
-            'use_afterpay' => $this->use_afterpay ? "true" : "false",
             'billing' => $model['billing'] ?? [],
         )));
 
