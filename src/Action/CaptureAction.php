@@ -54,9 +54,12 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface {
                 $model['status'] = 'failed';
                 $model['error'] = 'failed';
             }
-            foreach ($paymentIntent->charges as $charge) {
+            foreach ($paymentIntent->charges ?? [] as $charge) {
                 $model['transactionReference'] = $charge->id;
                 $model['result'] = $charge;
+            }
+            if ($paymentIntent->latest_charge ?? false) {
+                $model['transactionReference'] = $paymentIntent->latest_charge;
             }
         }
     }
