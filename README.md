@@ -30,13 +30,6 @@ $payum = (new PayumBuilder)
         'img_url' => 'https://path/to/logo/image.jpg',
     ])
 
-    ->addGateway('stripe_afterpay', [
-        'factory' => 'stripe_afterpay',
-        'publishable_key' => 'Your Public Key',
-        'secret_key' => 'Your Private Key',
-        'img_url' => 'https://path/to/logo/image.jpg',
-    ])
-
     ->getPayum()
 ;
 ```
@@ -62,6 +55,7 @@ $payment->setDetails([
     'local' => [
         'email' => $email, // Used for the customer to be able to save payment details
     ],
+    'limit_payment_type' => 'card', // Optionally limit to card transactions only, to disable Afterpay / Klarna / Zip etc.
 ]);
 $storage->setInternalDetails($payment, $request);
 
@@ -71,9 +65,9 @@ header("Location: " . $url);
 die();
 ```
 
-### Request Afterpay payment
+### Request Afterpay, Klarna, Affirm, Zip etc payment
 
-Afterpay requires more information about the customer to process the payment
+BNPL requires more information about the customer to process the payment
 
 ```php
 <?php
@@ -94,6 +88,7 @@ $payment->setDetails([
     'local' => [
         'email' => $email, // Used for the customer to be able to save payment details
     ],
+    'limit_payment_type' => 'afterpay_clearpay,klarna,affirm,zip', // List of payment types at https://stripe.com/docs/api/payment_methods/object#payment_method_object-type
     'shipping' => [
         'name' => 'Firstname Lastname',
         'address' => [
@@ -118,7 +113,7 @@ $payment->setDetails([
 ]);
 $storage->setInternalDetails($payment, $request);
 
-$captureToken = $payum->getTokenFactory()->createCaptureToken('stripe_afterpay', $payment, 'done.php');
+$captureToken = $payum->getTokenFactory()->createCaptureToken('stripe_elements', $payment, 'done.php');
 $url = $captureToken->getTargetUrl();
 header("Location: " . $url);
 die();

@@ -50,6 +50,7 @@ class ObtainNonceAction implements ActionInterface, GatewayAwareInterface {
             $model['nonce'] = $getHttpRequest->request['payment_intent'];
             return;
         }
+        // Comma separate list of enabled payment types for this transaction - get list of payment types at https://stripe.com/docs/api/payment_methods/object#payment_method_object-type
         $limit_payment_type = $model['limit_payment_type'] ?? '';
         $paymentIntentData = [
             'amount' => round($model['amount'] * pow(10, $model['currencyDigits'])),
