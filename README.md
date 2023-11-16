@@ -28,6 +28,7 @@ $payum = (new PayumBuilder)
         'publishable_key' => 'Your Public Key',
         'secret_key' => 'Your Private Key',
         'img_url' => 'https://path/to/logo/image.jpg',
+        'img_2_url' => 'https://path/to/logo/pay_by_image.jpg',
     ])
 
     ->getPayum()
