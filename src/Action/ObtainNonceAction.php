@@ -76,6 +76,7 @@ class ObtainNonceAction implements ActionInterface, GatewayAwareInterface {
             'publishable_key' => $model['publishable_key'],
             'actionUrl' => $uri->withPath('')->withFragment('')->withQuery('')->__toString() . $getHttpRequest->uri,
             'imgUrl' => $model['img_url'],
+            'payment_method_order' => json_encode($model['payment_method_order'] ?? []),
             'billing' => $model['billing'] ?? [],
         )));
 

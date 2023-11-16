@@ -48,6 +48,7 @@
 
       const paymentElementOptions = {
         layout: "tabs",
+        paymentMethodOrder: {{ payment_method_order|raw }},
       };
 
       const paymentElement = elements.create("payment", paymentElementOptions);
