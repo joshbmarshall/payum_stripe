@@ -56,7 +56,21 @@ $payment->setDetails([
         'email' => $email, // Used for the customer to be able to save payment details
     ],
     'limit_payment_type' => 'card', // Optionally limit to card transactions only, to disable Afterpay / Klarna / Zip etc.
-    'payment_method_order' => ['apple_pay', 'google_pay', 'card'], // Optionally re-order the wallets to be before card if they apply to the transaction
+    'payment_method_options' => [
+        'layout' => 'tabs',
+        'paymentMethodOrder' =>
+        [
+            'apple_pay',
+            'google_pay',
+            'card',
+        ], // Optionally re-order the wallets to be before card if they apply to the transaction
+        'defaultValues' => [
+            'billingDetails' => [
+                'name' => $customer_name,
+                'email' => $customer_email,
+            ], // Optionally prefill some fields for some payment types
+        ],
+    ],
 ]);
 $storage->setInternalDetails($payment, $request);
 

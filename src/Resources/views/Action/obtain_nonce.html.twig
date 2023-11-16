@@ -46,10 +46,7 @@
         clientSecret: '{{ client_secret }}',
       });
 
-      const paymentElementOptions = {
-        layout: "tabs",
-        paymentMethodOrder: {{ payment_method_order|raw }},
-      };
+      const paymentElementOptions = {{ payment_element_options|raw }}
 
       const paymentElement = elements.create("payment", paymentElementOptions);
       paymentElement.mount("#payment-element");
