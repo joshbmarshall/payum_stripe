@@ -61,6 +61,8 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface {
             }
             if ($paymentIntent->latest_charge ?? false) {
                 $model['transactionReference'] = $paymentIntent->latest_charge;
+                $charge = $stripe->charges->retrieve($paymentIntent->latest_charge);
+                $model['stripe_charge_info'] = $charge;
             }
         }
     }
