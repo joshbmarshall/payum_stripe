@@ -70,7 +70,7 @@ class ObtainNonceAction implements ActionInterface, GatewayAwareInterface {
         }
 
         $model['stripePaymentIntent'] = \Stripe\PaymentIntent::create($paymentIntentData);
-        $payment_element_options = $model['payment_element_options'] ?? [];
+        $payment_element_options = $model['payment_element_options'] ?? (object)[];
         $this->gateway->execute($renderTemplate = new RenderTemplate($this->templateName, array(
             'amount' => $model['currencySymbol'] . ' ' . number_format($model['amount'], $model['currencyDigits']),
             'client_secret' => $model['stripePaymentIntent']->client_secret,
