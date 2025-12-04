@@ -1,4 +1,5 @@
 <?php
+
 namespace Cognito\PayumStripeElements\Action;
 
 use Payum\Core\Action\ActionInterface;
@@ -15,7 +16,7 @@ class ConvertPaymentAction implements ActionInterface, GatewayAwareInterface
     use GatewayAwareTrait;
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      *
      * @param Convert $request
      */
@@ -28,25 +29,24 @@ class ConvertPaymentAction implements ActionInterface, GatewayAwareInterface
 
         $details = ArrayObject::ensureArrayObject($payment->getDetails());
         $this->gateway->execute($currency = new GetCurrency($payment->getCurrencyCode()));
-        $divisor = pow(10, $currency->exp);
-        $details["amount"] = $payment->getTotalAmount() / $divisor;
-        $details["currency"] = $payment->getCurrencyCode();
-        $details["currencySymbol"] = $currency->alpha3;
-        $details["currencyDigits"] = $currency->exp;
-        $details["description"] = $payment->getDescription();
+        $divisor                   = pow(10, $currency->exp);
+        $details['amount']         = $payment->getTotalAmount() / $divisor;
+        $details['currency']       = $payment->getCurrencyCode();
+        $details['currencySymbol'] = $currency->alpha3;
+        $details['currencyDigits'] = $currency->exp;
+        $details['description']    = $payment->getDescription();
 
         $request->setResult((array) $details);
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function supports($request)
     {
         return
-            $request instanceof Convert &&
-            $request->getSource() instanceof PaymentInterface &&
-            $request->getTo() == 'array'
-        ;
+            $request instanceof Convert
+            && $request->getSource() instanceof PaymentInterface
+            && $request->getTo() == 'array';
     }
 }
