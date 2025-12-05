@@ -49,6 +49,10 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
             $stripe        = new \Stripe\StripeClient($this->config['secret_key']);
             $paymentIntent = $stripe->paymentIntents->retrieve($model['nonce'], []);
 
+            if ($paymentIntent->status == \Stripe\PaymentIntent::STATUS_REQUIRES_CAPTURE) {
+                $paymentIntent->capture();
+            }
+
             if ($paymentIntent->status == \Stripe\PaymentIntent::STATUS_SUCCEEDED) {
                 $model['status'] = 'success';
             } else {

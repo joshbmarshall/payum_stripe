@@ -60,6 +60,7 @@ class ObtainNonceAction implements ActionInterface, GatewayAwareInterface
             'metadata'             => ['integration_check' => 'accept_a_payment'],
             'statement_descriptor' => $model['statement_descriptor_suffix'],
             'description'          => $model['description'],
+            'capture_method'       => 'manual',
         ];
 
         if ($limit_payment_type) {
