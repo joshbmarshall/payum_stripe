@@ -1,4 +1,5 @@
 <?php
+
 namespace Cognito\PayumStripeElements;
 
 use Http\Message\MessageFactory;
@@ -23,22 +24,16 @@ class Api
     protected $options = [];
 
     /**
-     * @param array               $options
-     * @param HttpClientInterface $client
-     * @param MessageFactory      $messageFactory
-     *
      * @throws \Payum\Core\Exception\InvalidArgumentException if an option is invalid
      */
     public function __construct(array $options, HttpClientInterface $client, MessageFactory $messageFactory)
     {
-        $this->options = $options;
-        $this->client = $client;
+        $this->options        = $options;
+        $this->client         = $client;
         $this->messageFactory = $messageFactory;
     }
 
     /**
-     * @param array $fields
-     *
      * @return array
      */
     protected function doRequest($method, array $fields)

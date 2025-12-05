@@ -13,27 +13,26 @@ use Payum\Core\Reply\HttpResponse;
 use Payum\Core\Request\GetHttpRequest;
 use Payum\Core\Request\RenderTemplate;
 
-class ObtainNonceAction implements ActionInterface, GatewayAwareInterface {
+class ObtainNonceAction implements ActionInterface, GatewayAwareInterface
+{
     use GatewayAwareTrait;
-
 
     /**
      * @var string
      */
     protected $templateName;
 
-    /**
-     * @param string $templateName
-     */
-    public function __construct(string $templateName) {
+    public function __construct(string $templateName)
+    {
         $this->templateName = $templateName;
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
-    public function execute($request) {
-        /** @var $request ObtainNonce */
+    public function execute($request)
+    {
+        /** @var ObtainNonce $request */
         RequestNotSupportedException::assertSupports($this, $request);
 
         $model = ArrayObject::ensureArrayObject($request->getModel());
@@ -45,52 +44,61 @@ class ObtainNonceAction implements ActionInterface, GatewayAwareInterface {
 
         $getHttpRequest = new GetHttpRequest();
         $this->gateway->execute($getHttpRequest);
+
         // Received payment intent information from Stripe
         if (isset($getHttpRequest->request['payment_intent'])) {
             $model['nonce'] = $getHttpRequest->request['payment_intent'];
+
             return;
         }
         // Comma separate list of enabled payment types for this transaction - get list of payment types at https://stripe.com/docs/api/payment_methods/object#payment_method_object-type
         $limit_payment_type = $model['limit_payment_type'] ?? '';
-        $paymentIntentData = [
-            'amount' => round($model['amount'] * pow(10, $model['currencyDigits'])),
-            'shipping' => $model['shipping'],
-            'currency' => $model['currency'],
-            'metadata' => ['integration_check' => 'accept_a_payment'],
+        $paymentIntentData  = [
+            'amount'               => round($model['amount'] * pow(10, $model['currencyDigits'])),
+            'shipping'             => $model['shipping'],
+            'currency'             => $model['currency'],
+            'metadata'             => ['integration_check' => 'accept_a_payment'],
             'statement_descriptor' => $model['statement_descriptor_suffix'],
-            'description' => $model['description'],
+            'description'          => $model['description'],
+            'capture_method'       => 'manual',
         ];
+
         if ($limit_payment_type) {
             $paymentIntentData['payment_method_types'] = explode(',', $limit_payment_type);
         } else {
             $paymentIntentData['automatic_payment_methods'] = [
-                'enabled' => true,
+                'enabled'         => true,
                 'allow_redirects' => 'always',
             ];
         }
 
+        if ($model['app_fee'] ?? 0) {
+            $paymentIntentData['application_fee_amount'] = round($model['app_fee'] * pow(10, $model['currencyDigits']));
+        }
+
         $model['stripePaymentIntent'] = \Stripe\PaymentIntent::create($paymentIntentData);
-        $payment_element_options = $model['payment_element_options'] ?? (object)[];
-        $this->gateway->execute($renderTemplate = new RenderTemplate($this->templateName, array(
-            'amount' => $model['currencySymbol'] . ' ' . number_format($model['amount'], $model['currencyDigits']),
-            'client_secret' => $model['stripePaymentIntent']->client_secret,
-            'publishable_key' => $model['publishable_key'],
-            'actionUrl' => $uri->withPath('')->withFragment('')->withQuery('')->__toString() . $getHttpRequest->uri,
-            'imgUrl' => $model['img_url'],
-            'img2Url' => $model['img_2_url'],
+        $payment_element_options      = $model['payment_element_options'] ?? (object) [];
+        $this->gateway->execute($renderTemplate = new RenderTemplate($this->templateName, [
+            'amount'                  => $model['currencySymbol'] . ' ' . number_format($model['amount'], $model['currencyDigits']),
+            'client_secret'           => $model['stripePaymentIntent']->client_secret,
+            'publishable_key'         => $model['publishable_key'],
+            'actionUrl'               => $uri->withPath('')->withFragment('')->withQuery('')->__toString() . $getHttpRequest->uri,
+            'imgUrl'                  => $model['img_url'],
+            'img2Url'                 => $model['img_2_url'],
             'payment_element_options' => json_encode($payment_element_options),
-            'billing' => $model['billing'] ?? [],
-        )));
+            'billing'                 => $model['billing'] ?? [],
+        ]));
 
         throw new HttpResponse($renderTemplate->getResult());
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
-    public function supports($request) {
+    public function supports($request)
+    {
         return
-            $request instanceof ObtainNonce &&
-            $request->getModel() instanceof \ArrayAccess;
+            $request instanceof ObtainNonce
+            && $request->getModel() instanceof \ArrayAccess;
     }
 }
