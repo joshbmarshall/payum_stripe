@@ -72,6 +72,10 @@ class ObtainNonceAction implements ActionInterface, GatewayAwareInterface
             ];
         }
 
+        if ($model['app_fee'] ?? 0) {
+            $paymentIntentData['application_fee_amount'] = round($model['app_fee'] * pow(10, $model['currencyDigits']));
+        }
+
         $model['stripePaymentIntent'] = \Stripe\PaymentIntent::create($paymentIntentData);
         $payment_element_options      = $model['payment_element_options'] ?? (object) [];
         $this->gateway->execute($renderTemplate = new RenderTemplate($this->templateName, [
